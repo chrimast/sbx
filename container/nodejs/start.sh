@@ -370,7 +370,16 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
                   "password":"${uuid}"
                 }
             ],
-            "padding_scheme":[],
+            "padding_scheme":[
+              "stop=7",
+              "0=30-30",
+              "1=80-280",
+              "2=220-380,c,380-720",
+              "3=40-80,200-600",
+              "4=300-800",
+              "5=200-700",
+              "6=250-650"
+            ],
             "tls":{
                 "enabled": true,
                 "certificate_path": "$HOME/agsbx/cert.pem",
@@ -417,7 +426,16 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
                   "password":"${uuid}"
                 }
             ],
-            "padding_scheme":[],
+            "padding_scheme":[
+              "stop=7",
+              "0=30-30",
+              "1=80-280",
+              "2=220-380,c,380-720",
+              "3=40-80,200-600",
+              "4=300-800",
+              "5=200-700",
+              "6=250-650"
+            ],
             "tls": {
             "enabled": true,
             "server_name": "${reym}",
