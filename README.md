@@ -16,7 +16,7 @@
 
 ## 使用
 
-打开 `index.html` 勾选协议后复制命令，或：
+命令生成页：[https://chrimast.github.io/sbx/](https://chrimast.github.io/sbx/)（GitHub Pages 直接跑仓库根目录的 `index.html`）。本地也可打开 `index.html`。勾选协议后复制命令，或：
 
 ```bash
 bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)
