@@ -24,4 +24,4 @@ bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/argosbx.sh)
 
 ## 说明
 
-Xray / Sing-box 二进制仍从上游 Release 下载。WARP 出站需能拉到配置，失败则回退本地 IP，不再内置共享密钥。
+Xray / Sing-box 二进制仍从上游 Release 下载。出站固定为服务器本地 IP，已去掉套 WARP-IP 出站。

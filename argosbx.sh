@@ -4,7 +4,7 @@ mkdir -p "$HOME/agsbx"
 url='https://raw.githubusercontent.com/chrimast/sbx/main/argosbx.sh'
 case "${*##* }" in list|del|upx|ups|res) ;; *)
 cmd=""
-for v in uuid vlpt hypt xhpt anpt sopt xupt xcpt reym cdnym warp name oap; do
+for v in uuid vlpt hypt xhpt anpt sopt xupt xcpt reym cdnym name oap; do
 [ -n "${!v+x}" ] && cmd+="$v=\"${!v}\" "
 done
 main="bash <(curl -Ls $url)"
@@ -16,7 +16,6 @@ cmd+="$main${*:+ $*}"
 [ -z "${xhpt+x}" ] || xhp=yes
 [ -z "${anpt+x}" ] || anp=yes
 [ -z "${sopt+x}" ] || sop=yes
-[ -z "${warp+x}" ] || wap=yes
 [ -z "${xupt+x}" ] || xup=yes
 [ -z "${xcpt+x}" ] || xcp=yes
 if find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' || pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then
@@ -37,7 +36,6 @@ export port_xc=${xcpt:-''}
 export ym_vl_re=${reym:-''}
 export cdnym=${cdnym:-''}
 export ippz=${ippz:-''}
-export warp=${warp:-''}
 export name=${name:-''}
 export oap=${oap:-''}
 v46url="https://icanhazip.com"
@@ -87,19 +85,7 @@ v6=$( (command -v curl >/dev/null 2>&1 && curl -s6m5 -k "$v46url" 2>/dev/null) |
 v6dq=$( (command -v curl >/dev/null 2>&1 && curl -s6m5 -k https://ip.fm | sed -n 's/.*Location: //p' 2>/dev/null) || (command -v wget >/dev/null 2>&1 && timeout 3 wget -6 --tries=2 -qO- https://ip.fm | grep '<span class="has-text-grey-light">Location:' | tail -n1 | sed -E 's/.*>Location: <\/span>([^<]+)<.*/\1/' 2>/dev/null) )
 v4dq=$( (command -v curl >/dev/null 2>&1 && curl -s4m5 -k https://ip.fm | sed -n 's/.*Location: //p' 2>/dev/null) || (command -v wget >/dev/null 2>&1 && timeout 3 wget -4 --tries=2 -qO- https://ip.fm | grep '<span class="has-text-grey-light">Location:' | tail -n1 | sed -E 's/.*>Location: <\/span>([^<]+)<.*/\1/' 2>/dev/null) )
 }
-warpsx(){
-warpurl=$( (command -v curl >/dev/null 2>&1 && curl -sm5 -k https://warp.xijp.eu.org 2>/dev/null) || (command -v wget >/dev/null 2>&1 && timeout 3 wget --tries=2 -qO- https://warp.xijp.eu.org 2>/dev/null) )
-if [ -z "$warpurl" ] || printf '%s' "$warpurl" | grep -q html; then
-if [ "$wap" = yes ]; then
-echo "无法获取 WARP 配置，已跳过 WARP 出站"
-wap=warpargo
-fi
-pvk=''; wpv6=''; res=''
-else
-pvk=$(echo "$warpurl" | awk -F'：' '/Private_key/{print $2}' | xargs)
-wpv6=$(echo "$warpurl" | awk -F'：' '/IPV6/{print $2}' | xargs)
-res=$(echo "$warpurl" | awk -F'：' '/reserved/{print $2}' | xargs)
-fi
+outcfg(){
 if [ -n "$name" ]; then
 sxname=$name-
 echo "$sxname" > "$HOME/agsbx/name"
@@ -107,34 +93,7 @@ echo
 echo "所有节点名称前缀：$name"
 fi
 v4v6
-if echo "$v6" | grep -q '^2a09' || echo "$v4" | grep -q '^104.28'; then
-s1outtag=direct; s2outtag=direct; x1outtag=direct; x2outtag=direct; xip='"::/0", "0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warpargo
-echo; echo "请注意：你已安装了warp"
-else
-if [ "$wap" != yes ]; then
-s1outtag=direct; s2outtag=direct; x1outtag=direct; x2outtag=direct; xip='"::/0", "0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warpargo
-else
-case "$warp" in
-""|sx|xs) s1outtag=warp-out; s2outtag=warp-out; x1outtag=warp-out; x2outtag=warp-out; xip='"::/0", "0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-s ) s1outtag=warp-out; s2outtag=warp-out; x1outtag=direct; x2outtag=direct; xip='"::/0", "0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-s4) s1outtag=warp-out; s2outtag=direct; x1outtag=direct; x2outtag=direct; xip='"::/0", "0.0.0.0/0"'; sip='"0.0.0.0/0"'; wap=warp ;;
-s6) s1outtag=warp-out; s2outtag=direct; x1outtag=direct; x2outtag=direct; xip='"::/0", "0.0.0.0/0"'; sip='"::/0"'; wap=warp ;;
-x ) s1outtag=direct; s2outtag=direct; x1outtag=warp-out; x2outtag=warp-out; xip='"::/0", "0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-x4) s1outtag=direct; s2outtag=direct; x1outtag=warp-out; x2outtag=direct; xip='"0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-x6) s1outtag=direct; s2outtag=direct; x1outtag=warp-out; x2outtag=direct; xip='"::/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-s4x4|x4s4) s1outtag=warp-out; s2outtag=direct; x1outtag=warp-out; x2outtag=direct; xip='"0.0.0.0/0"'; sip='"0.0.0.0/0"'; wap=warp ;;
-s4x6|x6s4) s1outtag=warp-out; s2outtag=direct; x1outtag=warp-out; x2outtag=direct; xip='"::/0"'; sip='"0.0.0.0/0"'; wap=warp ;;
-s6x4|x4s6) s1outtag=warp-out; s2outtag=direct; x1outtag=warp-out; x2outtag=direct; xip='"0.0.0.0/0"'; sip='"::/0"'; wap=warp ;;
-s6x6|x6s6) s1outtag=warp-out; s2outtag=direct; x1outtag=warp-out; x2outtag=direct; xip='"::/0"'; sip='"::/0"'; wap=warp ;;
-sx4|x4s) s1outtag=warp-out; s2outtag=warp-out; x1outtag=warp-out; x2outtag=direct; xip='"0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-sx6|x6s) s1outtag=warp-out; s2outtag=warp-out; x1outtag=warp-out; x2outtag=direct; xip='"::/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warp ;;
-xs4|s4x) s1outtag=warp-out; s2outtag=direct; x1outtag=warp-out; x2outtag=warp-out; xip='"::/0", "0.0.0.0/0"'; sip='"0.0.0.0/0"'; wap=warp ;;
-xs6|s6x) s1outtag=warp-out; s2outtag=direct; x1outtag=warp-out; x2outtag=warp-out; xip='"::/0", "0.0.0.0/0"'; sip='"::/0"'; wap=warp ;;
-* ) s1outtag=direct; s2outtag=direct; x1outtag=direct; x2outtag=direct; xip='"::/0", "0.0.0.0/0"'; sip='"::/0", "0.0.0.0/0"'; wap=warpargo ;;
-esac
-fi
-fi
-case "$warp" in *x4*) wxryx='ForceIPv4' ;; *x6*) wxryx='ForceIPv6' ;; *) wxryx='ForceIPv6v4' ;; esac
+s1outtag=direct; s2outtag=direct; x1outtag=direct; x2outtag=direct
 if command -v curl >/dev/null 2>&1; then
 curl -s4m5 -k "$v46url" >/dev/null 2>&1 && v4_ok=true
 elif command -v wget >/dev/null 2>&1; then
@@ -146,14 +105,17 @@ elif command -v wget >/dev/null 2>&1; then
 timeout 3 wget -6 --tries=2 -qO- "$v46url" >/dev/null 2>&1 && v6_ok=true
 fi
 if [ "$v4_ok" = true ] && [ "$v6_ok" = true ]; then
-case "$warp" in *s4*) sbyx='prefer_ipv4' ;; *) sbyx='prefer_ipv6' ;; esac
-case "$warp" in *x4*) xryx='ForceIPv4v6' ;; *x*) xryx='ForceIPv6v4' ;; *) xryx='ForceIPv4v6' ;; esac
-elif [ "$v4_ok" = true ] && [ "$v6_ok" != true ]; then
-case "$warp" in *s4*|x) sbyx='ipv4_only' ;; *) sbyx='prefer_ipv6' ;; esac
-case "$warp" in *x4*) xryx='ForceIPv4' ;; *x*) xryx='ForceIPv6v4' ;; *) xryx='ForceIPv4v6' ;; esac
-elif [ "$v4_ok" != true ] && [ "$v6_ok" = true ]; then
-case "$warp" in *s6*|x) sbyx='ipv6_only' ;; *) sbyx='prefer_ipv4' ;; esac
-case "$warp" in *x6*) xryx='ForceIPv6' ;; *x*) xryx='ForceIPv4v6' ;; *) xryx='ForceIPv6v4' ;; esac
+sbyx='prefer_ipv4'
+xryx='ForceIPv4v6'
+elif [ "$v4_ok" = true ]; then
+sbyx='ipv4_only'
+xryx='ForceIPv4'
+elif [ "$v6_ok" = true ]; then
+sbyx='ipv6_only'
+xryx='ForceIPv6'
+else
+sbyx='prefer_ipv4'
+xryx='ForceIPv4v6'
 fi
 }
 upxray(){
@@ -635,53 +597,15 @@ cat >> "$HOME/agsbx/xr.json" <<EOF
       "settings": {
       "domainStrategy":"${xryx}"
      }
-    },
-    {
-      "tag": "x-warp-out",
-      "protocol": "wireguard",
-      "settings": {
-        "secretKey": "${pvk}",
-        "address": [
-          "172.16.0.2/32",
-          "${wpv6}/128"
-        ],
-        "peers": [
-          {
-            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-            "allowedIPs": [
-              "0.0.0.0/0",
-              "::/0"
-            ],
-            "endpoint": "${xendip}:2408"
-          }
-        ],
-        "reserved": ${res}
-        }
-    },
-    {
-      "tag":"warp-out",
-      "protocol":"freedom",
-        "settings":{
-        "domainStrategy":"${wxryx}"
-       },
-       "proxySettings":{
-       "tag":"x-warp-out"
-     }
-}
+    }
   ],
   "routing": {
     "domainStrategy": "IPOnDemand",
     "rules": [
       {
         "type": "field",
-        "ip": [ ${xip} ],
         "network": "tcp,udp",
-        "outboundTag": "${x1outtag}"
-      },
-      {
-        "type": "field",
-        "network": "tcp,udp",
-        "outboundTag": "${x2outtag}"
+        "outboundTag": "direct"
       }
     ]
   }
@@ -737,29 +661,6 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
       "tag": "direct"
     }
   ],
-  "endpoints": [
-    {
-      "type": "wireguard",
-      "tag": "warp-out",
-      "address": [
-        "172.16.0.2/32",
-        "${wpv6}/128"
-      ],
-      "private_key": "${pvk}",
-      "peers": [
-        {
-          "address": "${sendip}",
-          "port": 2408,
-          "public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-          "allowed_ips": [
-            "0.0.0.0/0",
-            "::/0"
-          ],
-          "reserved": $res
-        }
-      ]
-    }
-  ],
   "route": {
     "rules": [
        {
@@ -768,13 +669,9 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
        {
         "action": "resolve",
          "strategy": "${sbyx}"
-       },
-      {
-        "ip_cidr": [ ${sip} ],         
-        "outbound": "${s1outtag}"
-      }
+       }
     ],
-    "final": "${s2outtag}"
+    "final": "direct"
   }
 }
 EOF
@@ -824,14 +721,14 @@ if [ "$anp" != yes ]; then
 installxray
 xrsbhy2
 xrsbso
-warpsx
+outcfg
 xrsbout
 anp="anptargo"
 elif [ "$xhp" != yes ] && [ "$vlp" != yes ] && [ "$xup" != yes ] && [ "$xcp" != yes ]; then
 installsb
 xrsbhy2
 xrsbso
-warpsx
+outcfg
 xrsbout
 xhp="xhptargo"; vlp="vlptargo"; xup="xuptargo"; xcp="xcptargo"
 else
@@ -839,7 +736,7 @@ installsb
 installxray
 xrsbhy2
 xrsbso
-warpsx
+outcfg
 xrsbout
 fi
 sleep 5
@@ -852,7 +749,7 @@ mkdir -p "$HOME/bin"
 (command -v curl >/dev/null 2>&1 && curl -sL "$agsbxurl" -o "$SCRIPT_PATH") || (command -v wget >/dev/null 2>&1 && wget -qO "$SCRIPT_PATH" "$agsbxurl")
 chmod +x "$SCRIPT_PATH"
 if ! pidof systemd >/dev/null 2>&1 && ! command -v rc-service >/dev/null 2>&1; then
-echo "if ! find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' && ! pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then echo '检测到系统可能中断过，或者变量格式错误？建议在SSH对话框输入 reboot 重启下服务器。现在自动执行脚本的节点恢复操作，请稍等……'; sleep 6; export alns=\"${alns}\" cfip=\"${cfip}\" hyjpt=\"${hyjpt}\" cdnym=\"${cdnym}\" name=\"${name}\" ippz=\"${ippz}\" uuid=\"${uuid}\" $wap=\"${warp}\" $xhp=\"${port_xh}\" $xup=\"${port_xu}\" $sop=\"${port_so}\" $anp=\"${port_an}\" $vlp=\"${port_vl_re}\" $hyp=\"${port_hy2}\" $xcp=\"${port_xc}\" reym=\"${ym_vl_re}\"; bashbash "$HOME/bin/agsbx"; fi" >> ~/.bashrc
+echo "if ! find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' && ! pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then echo '检测到系统可能中断过，或者变量格式错误？建议在SSH对话框输入 reboot 重启下服务器。现在自动执行脚本的节点恢复操作，请稍等……'; sleep 6; export alns=\"${alns}\" cfip=\"${cfip}\" hyjpt=\"${hyjpt}\" cdnym=\"${cdnym}\" name=\"${name}\" ippz=\"${ippz}\" uuid=\"${uuid}\" $xhp=\"${port_xh}\" $xup=\"${port_xu}\" $sop=\"${port_so}\" $anp=\"${port_an}\" $vlp=\"${port_vl_re}\" $hyp=\"${port_hy2}\" $xcp=\"${port_xc}\" reym=\"${ym_vl_re}\"; bashbash "$HOME/bin/agsbx"; fi" >> ~/.bashrc
 fi
 sed -i '/export PATH="\$HOME\/bin:\$PATH"/d' ~/.bashrc
 echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.bashrc"
@@ -1694,13 +1591,6 @@ for P in /proc/[0-9]*; do if [ -L "$P/exe" ]; then TARGET=$(readlink -f "$P/exe"
 kill -15 $(pgrep -f 'agsbx/s' 2>/dev/null) $(pgrep -f 'agsbx/c' 2>/dev/null) $(pgrep -f 'agsbx/x' 2>/dev/null) >/dev/null 2>&1
 if [ -z "$( (command -v curl >/dev/null 2>&1 && curl -s4m5 -k "$v46url" 2>/dev/null) || (command -v wget >/dev/null 2>&1 && timeout 3 wget -4 -qO- --tries=2 "$v46url" 2>/dev/null) )" ]; then
 echo -e "nameserver 2a00:1098:2b::1\nnameserver 2a00:1098:2c::1" > /etc/resolv.conf
-fi
-if [ -n "$( (command -v curl >/dev/null 2>&1 && curl -s6m5 -k "$v46url" 2>/dev/null) || (command -v wget >/dev/null 2>&1 && timeout 3 wget -6 -qO- --tries=2 "$v46url" 2>/dev/null) )" ]; then
-sendip="2606:4700:d0::a29f:c001"
-xendip="[2606:4700:d0::a29f:c001]"
-else
-sendip="162.159.192.1"
-xendip="162.159.192.1"
 fi
 echo "VPS系统：$op"
 echo "CPU架构：$cpu"
