@@ -526,11 +526,15 @@ fi
 echo "$ym_vl_re" > "$HOME/agsbx/ym_vl_re"
 echo "Reality域名：$ym_vl_re"
 mkdir -p "$HOME/agsbx/sbk"
-if [ ! -e "$HOME/agsbx/sbk/private_key" ]; then
+if [ ! -s "$HOME/agsbx/sbk/private_key" ] || [ ! -s "$HOME/agsbx/sbk/public_key" ] || [ ! -s "$HOME/agsbx/sbk/short_id" ]; then
 key_pair=$("$HOME/agsbx/sing-box" generate reality-keypair)
-private_key=$(echo "$key_pair" | awk '/PrivateKey/ {print $2}' | tr -d '"')
-public_key=$(echo "$key_pair" | awk '/PublicKey/ {print $2}' | tr -d '"')
-short_id=$("$HOME/agsbx/sing-box" generate rand --hex 4)
+private_key=$(printf '%s\n' "$key_pair" | awk '/PrivateKey/{print $NF}' | tr -d '"')
+public_key=$(printf '%s\n' "$key_pair" | awk '/PublicKey/{print $NF}' | tr -d '"')
+short_id=$("$HOME/agsbx/sing-box" generate rand 4 --hex)
+if [ -z "$private_key" ] || [ -z "$public_key" ] || [ -z "$short_id" ]; then
+echo "Reality 密钥生成失败"
+exit 1
+fi
 echo "$private_key" > "$HOME/agsbx/sbk/private_key"
 echo "$public_key" > "$HOME/agsbx/sbk/public_key"
 echo "$short_id" > "$HOME/agsbx/sbk/short_id"
@@ -538,6 +542,10 @@ fi
 private_key_s=$(cat "$HOME/agsbx/sbk/private_key")
 public_key_s=$(cat "$HOME/agsbx/sbk/public_key")
 short_id_s=$(cat "$HOME/agsbx/sbk/short_id")
+if [ -z "$private_key_s" ] || [ -z "$public_key_s" ] || [ -z "$short_id_s" ]; then
+echo "Reality 密钥生成失败"
+exit 1
+fi
 if [ -z "$port_ar" ] && [ ! -e "$HOME/agsbx/port_ar" ]; then
 port_ar=$(shuf -i 10000-65535 -n 1)
 echo "$port_ar" > "$HOME/agsbx/port_ar"
@@ -1843,6 +1851,10 @@ echo "脚本已安装"
 echo
 sbxstatus
 echo
+if [ "$xcp" = yes ] || [ "$xup" = yes ] || [ "$sop" = yes ] || [ "$vlp" = yes ] || [ "$hyp" = yes ] || [ "$xhp" = yes ] || [ "$anp" = yes ] || [ "$arp" = yes ]; then
+echo "提示：命令里已带协议变量，但节点仍在运行，当前命令不会改协议。要按这条命令重装，请在末尾加 rep"
+echo
+fi
 echo "相关快捷方式如下："
 showmode
 exit

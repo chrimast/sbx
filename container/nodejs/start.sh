@@ -1,5 +1,7 @@
 #!/bin/sh
 export LANG=en_US.UTF-8
+[ -z "${anpt+x}" ] || anp=yes
+[ -z "${arpt+x}" ] || arp=yes
 export uuid=${uuid}
 export vlpt=${vlpt}
 export hypt=${hypt}
@@ -350,7 +352,7 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
     },
 EOF
 fi
-if [ -n "$anpt" ]; then
+if [ -n "$anp" ]; then
 if [ -z "$anpt" ] && [ ! -e "$HOME/agsbx/anpt" ]; then
 anpt=$(shuf -i 10000-65535 -n 1)
 echo "$anpt" > "$HOME/agsbx/anpt"
@@ -388,18 +390,22 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
         },
 EOF
 fi
-if [ -n "$arpt" ]; then
+if [ -n "$arp" ]; then
 if [ -z "$reym" ]; then
 reym=bing.com
 fi
 echo "$reym" > "$HOME/agsbx/reym"
 echo "Reality域名：$reym"
 mkdir -p "$HOME/agsbx/sbk"
-if [ ! -e "$HOME/agsbx/sbk/private_key" ]; then
+if [ ! -s "$HOME/agsbx/sbk/private_key" ] || [ ! -s "$HOME/agsbx/sbk/public_key" ] || [ ! -s "$HOME/agsbx/sbk/short_id" ]; then
 key_pair=$("$HOME/agsbx/sing-box" generate reality-keypair)
-private_key=$(echo "$key_pair" | awk '/PrivateKey/ {print $2}' | tr -d '"')
-public_key=$(echo "$key_pair" | awk '/PublicKey/ {print $2}' | tr -d '"')
-short_id=$("$HOME/agsbx/sing-box" generate rand --hex 4)
+private_key=$(printf '%s\n' "$key_pair" | awk '/PrivateKey/{print $NF}' | tr -d '"')
+public_key=$(printf '%s\n' "$key_pair" | awk '/PublicKey/{print $NF}' | tr -d '"')
+short_id=$("$HOME/agsbx/sing-box" generate rand 4 --hex)
+if [ -z "$private_key" ] || [ -z "$public_key" ] || [ -z "$short_id" ]; then
+echo "Reality 密钥生成失败"
+exit 1
+fi
 echo "$private_key" > "$HOME/agsbx/sbk/private_key"
 echo "$public_key" > "$HOME/agsbx/sbk/public_key"
 echo "$short_id" > "$HOME/agsbx/sbk/short_id"
@@ -407,6 +413,10 @@ fi
 private_key_s=$(cat "$HOME/agsbx/sbk/private_key")
 public_key_s=$(cat "$HOME/agsbx/sbk/public_key")
 short_id_s=$(cat "$HOME/agsbx/sbk/short_id")
+if [ -z "$private_key_s" ] || [ -z "$public_key_s" ] || [ -z "$short_id_s" ]; then
+echo "Reality 密钥生成失败"
+exit 1
+fi
 if [ -z "$arpt" ] && [ ! -e "$HOME/agsbx/arpt" ]; then
 arpt=$(shuf -i 10000-65535 -n 1)
 echo "$arpt" > "$HOME/agsbx/arpt"
@@ -572,7 +582,7 @@ nohup "$HOME/agsbx/sing-box" run -c "$HOME/agsbx/sb.json" >/dev/null 2>&1 &
 fi
 }
 ins(){
-if [ -z "$anpt" ] && [ -z "$arpt" ]; then
+if [ "$anp" != yes ] && [ "$arp" != yes ]; then
 installxray
 xrsbso
 outcfg
