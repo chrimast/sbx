@@ -43,12 +43,12 @@ sbx res     # 重启
 
 ## 外部 / 上游文件（非 sh）
 
-安装时按 CPU（`amd64` / `arm64`）从 `yonggekkk/argosbx` 的 Release 下载内核二进制，**不进本仓库**。已对照官方包校验 SHA-256，与官方文件一致，不是魔改内核：
+安装和 `sbx upx` / `sbx ups` 都从官方 latest 下载内核，**不进本仓库**：
 
-- Xray = [XTLS/Xray-core v26.3.27](https://github.com/XTLS/Xray-core/releases/tag/v26.3.27) 的 `Xray-linux-64` 解压出的 `xray`
-  镜像：`https://github.com/yonggekkk/argosbx/releases/download/argosbx/xray-$cpu`
-- Sing-box = [SagerNet/sing-box v1.14.4](https://github.com/SagerNet/sing-box/releases/tag/v1.14.4) 的官方 linux 包里的 `sing-box`
-  镜像：`https://github.com/yonggekkk/argosbx/releases/download/argosbx/sing-box-$cpu`
+- Xray：[XTLS/Xray-core](https://github.com/XTLS/Xray-core/releases/latest)
+  `https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip`（arm64 为 `Xray-linux-arm64-v8a.zip`）
+- Sing-box：[SagerNet/sing-box](https://github.com/SagerNet/sing-box/releases/latest)
+  `https://github.com/SagerNet/sing-box/releases/download/<最新tag>/sing-box-<版本>-linux-<amd64|arm64>.tar.gz`
 
 Clash 规则集（仅导出配置引用，运行时由客户端拉取）：
 

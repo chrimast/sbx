@@ -82,15 +82,80 @@ fi
 uuid=$(cat "$HOME/agsbx/uuid")
 echo "UUID密码：$uuid"
 }
+upxray(){
+mkdir -p "$HOME/agsbx" /tmp/sbxcore
+if [ "$cpu" = arm64 ]; then
+xzip="Xray-linux-arm64-v8a.zip"
+else
+xzip="Xray-linux-64.zip"
+fi
+url="https://github.com/XTLS/Xray-core/releases/latest/download/${xzip}"
+tmp="/tmp/sbxcore/${xzip}"
+echo "下载官方 Xray：${url}"
+(command -v curl >/dev/null 2>&1 && curl -Lo "$tmp" -# --retry 2 "$url") || (command -v wget >/dev/null 2>&1 && wget -O "$tmp" --tries=2 "$url")
+if [ ! -s "$tmp" ]; then
+echo "Xray 下载失败"
+return 1
+fi
+if command -v unzip >/dev/null 2>&1; then
+unzip -o -j "$tmp" xray -d "$HOME/agsbx" >/dev/null 2>&1
+elif command -v python3 >/dev/null 2>&1; then
+python3 - "$tmp" "$HOME/agsbx/xray" <<'PY'
+import zipfile, sys
+z = zipfile.ZipFile(sys.argv[1])
+open(sys.argv[2], "wb").write(z.read("xray"))
+PY
+else
+echo "缺少 unzip，无法解压 Xray"
+rm -f "$tmp"
+return 1
+fi
+rm -f "$tmp"
+chmod +x "$HOME/agsbx/xray"
+sbcore=$("$HOME/agsbx/xray" version 2>/dev/null | awk '/^Xray/{print $2}')
+echo "已安装Xray正式版内核：$sbcore"
+}
+upsingbox(){
+mkdir -p "$HOME/agsbx" /tmp/sbxcore
+if command -v curl >/dev/null 2>&1; then
+tag=$(curl -fsSL -o /dev/null -w '%{url_effective}' https://github.com/SagerNet/sing-box/releases/latest | tr -d '\r' | sed 's|.*/||')
+elif command -v wget >/dev/null 2>&1; then
+tag=$(wget --max-redirect=0 --server-response -qO /dev/null https://github.com/SagerNet/sing-box/releases/latest 2>&1 | awk 'tolower($1) ~ /location:/ {print $2; exit}' | tr -d '\r' | sed 's|.*/||')
+fi
+ver=${tag#v}
+if [ -z "$ver" ]; then
+echo "无法获取 sing-box 最新版本"
+return 1
+fi
+url="https://github.com/SagerNet/sing-box/releases/download/${tag}/sing-box-${ver}-linux-${cpu}.tar.gz"
+tmp="/tmp/sbxcore/sing-box.tgz"
+echo "下载官方 Sing-box：${url}"
+(command -v curl >/dev/null 2>&1 && curl -Lo "$tmp" -# --retry 2 "$url") || (command -v wget >/dev/null 2>&1 && wget -O "$tmp" --tries=2 "$url")
+if [ ! -s "$tmp" ]; then
+echo "Sing-box 下载失败"
+return 1
+fi
+rm -rf /tmp/sbxcore/sb
+mkdir -p /tmp/sbxcore/sb
+tar -xzf "$tmp" -C /tmp/sbxcore/sb
+found=$(find /tmp/sbxcore/sb -type f -name sing-box | head -n 1)
+if [ -z "$found" ]; then
+echo "Sing-box 压缩包中未找到二进制"
+rm -rf /tmp/sbxcore/sb "$tmp"
+return 1
+fi
+mv "$found" "$HOME/agsbx/sing-box"
+rm -rf /tmp/sbxcore/sb "$tmp"
+chmod +x "$HOME/agsbx/sing-box"
+sbcore=$("$HOME/agsbx/sing-box" version 2>/dev/null | awk '/version/{print $NF}')
+echo "已安装Sing-box正式版内核：$sbcore"
+}
 installxray(){
 echo
 echo "=========启用xray内核========="
 mkdir -p "$HOME/agsbx/xrk"
 if [ ! -e "$HOME/agsbx/xray" ]; then
-url="https://github.com/yonggekkk/argosbx/releases/download/argosbx/xray-$cpu"; out="$HOME/agsbx/xray"; (command -v curl >/dev/null 2>&1 && curl -Lo "$out" -# --retry 2 "$url") || (command -v wget>/dev/null 2>&1 && timeout 3 wget -O "$out" --tries=2 "$url")
-chmod +x "$HOME/agsbx/xray"
-sbcore=$("$HOME/agsbx/xray" version 2>/dev/null | awk '/^Xray/{print $2}')
-echo "已安装Xray正式版内核：$sbcore"
+upxray
 fi
 cat > "$HOME/agsbx/xr.json" <<EOF
 {
@@ -237,10 +302,7 @@ installsb(){
 echo
 echo "=========启用Sing-box内核========="
 if [ ! -e "$HOME/agsbx/sing-box" ]; then
-url="https://github.com/yonggekkk/argosbx/releases/download/argosbx/sing-box-$cpu"; out="$HOME/agsbx/sing-box"; (command -v curl>/dev/null 2>&1 && curl -Lo "$out" -# --retry 2 "$url") || (command -v wget>/dev/null 2>&1 && timeout 3 wget -O "$out" --tries=2 "$url")
-chmod +x "$HOME/agsbx/sing-box"
-sbcore=$("$HOME/agsbx/sing-box" version 2>/dev/null | awk '/version/{print $NF}')
-echo "已安装Sing-box正式版内核：$sbcore"
+upsingbox
 fi
 cat > "$HOME/agsbx/sb.json" <<EOF
 {
