@@ -406,6 +406,7 @@
           <h3>Singbox可选协议：</h3>
           <div class="protocol-grid">
             <label><input type="checkbox" data-proto="anpt"> AnyTLS <span class="pill">anpt</span></label><input type="text" placeholder="留空则随机端口" data-port="anpt">
+            <label><input type="checkbox" data-proto="arpt"> Any-reality <span class="pill">arpt</span></label><input type="text" placeholder="留空则随机端口" data-port="arpt">
           </div>
         </div>
         <div class="protocol-group separator">
@@ -487,7 +488,7 @@
 (function(){
   const CURL = 'bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)';
   const WGET = 'bash <(wget -qO- https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)';
-  const protoKeys = ['sopt','vlpt','xhpt','xupt','xcpt','hypt','anpt'];
+  const protoKeys = ['sopt','vlpt','xhpt','xupt','xcpt','hypt','anpt','arpt'];
   const optIds = ['ippz','uuid','reym','cfip','alns','hyjpt','cdnym','name', 'oap'];
 
   const cfip = document.getElementById('cfip');
@@ -495,6 +496,7 @@
   const vlessXhttpRealityCheckbox = document.querySelector('[data-proto="xhpt"]');
   const vlessXhttpTlsCheckbox = document.querySelector('[data-proto="xcpt"]');
   const hy2Checkbox = document.querySelector('[data-proto="hypt"]');
+  const anyRealityCheckbox = document.querySelector('[data-proto="arpt"]');
 
   const reymInput = document.getElementById('reym');
   const alnsSelect = document.getElementById('alns');
@@ -555,7 +557,7 @@
       cdnymInput.disabled = !isCdnEnabled;
       if (!isCdnEnabled) cdnymInput.value = '';
 
-      const isRealityEnabled = (vlessTcpRealityCheckbox && vlessTcpRealityCheckbox.checked) || (vlessXhttpRealityCheckbox && vlessXhttpRealityCheckbox.checked);
+      const isRealityEnabled = (vlessTcpRealityCheckbox && vlessTcpRealityCheckbox.checked) || (vlessXhttpRealityCheckbox && vlessXhttpRealityCheckbox.checked) || (anyRealityCheckbox && anyRealityCheckbox.checked);
       reymInput.disabled = !isRealityEnabled;
       if (!isRealityEnabled) reymInput.value = '';
 
@@ -574,7 +576,7 @@
 
   alnsSelect.addEventListener('change', updateDynamicInputs);
 
-  [vlessTcpRealityCheckbox, vlessXhttpRealityCheckbox, vlessXhttpTlsCheckbox, hy2Checkbox].forEach(ck => {
+  [vlessTcpRealityCheckbox, vlessXhttpRealityCheckbox, vlessXhttpTlsCheckbox, hy2Checkbox, anyRealityCheckbox].forEach(ck => {
     if (!ck) return;
     ck.addEventListener('change', () => {
       updateDynamicInputs();
@@ -704,7 +706,7 @@
 
     const isCdnEnabled = params['xcpt'] !== undefined;
     cdnymInput.disabled = !isCdnEnabled;
-    const isRealityEnabled = params['vlpt'] !== undefined || params['xhpt'] !== undefined;
+    const isRealityEnabled = params['vlpt'] !== undefined || params['xhpt'] !== undefined || params['arpt'] !== undefined;
     reymInput.disabled = !isRealityEnabled;
     hyjptInput.disabled = (params['hypt'] === undefined);
 

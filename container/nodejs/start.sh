@@ -5,6 +5,7 @@ export vlpt=${vlpt}
 export hypt=${hypt}
 export xhpt=${xhpt}
 export anpt=${anpt}
+export arpt=${arpt}
 export sopt=${sopt}
 export reym=${reym}
 export cdnym=${cdnym}
@@ -378,6 +379,61 @@ cat >> "$HOME/agsbx/sb.json" <<EOF
         },
 EOF
 fi
+if [ -n "$arpt" ]; then
+if [ -z "$reym" ]; then
+reym=apple.com
+fi
+echo "$reym" > "$HOME/agsbx/reym"
+echo "Reality域名：$reym"
+mkdir -p "$HOME/agsbx/sbk"
+if [ ! -e "$HOME/agsbx/sbk/private_key" ]; then
+key_pair=$("$HOME/agsbx/sing-box" generate reality-keypair)
+private_key=$(echo "$key_pair" | awk '/PrivateKey/ {print $2}' | tr -d '"')
+public_key=$(echo "$key_pair" | awk '/PublicKey/ {print $2}' | tr -d '"')
+short_id=$("$HOME/agsbx/sing-box" generate rand --hex 4)
+echo "$private_key" > "$HOME/agsbx/sbk/private_key"
+echo "$public_key" > "$HOME/agsbx/sbk/public_key"
+echo "$short_id" > "$HOME/agsbx/sbk/short_id"
+fi
+private_key_s=$(cat "$HOME/agsbx/sbk/private_key")
+public_key_s=$(cat "$HOME/agsbx/sbk/public_key")
+short_id_s=$(cat "$HOME/agsbx/sbk/short_id")
+if [ -z "$arpt" ] && [ ! -e "$HOME/agsbx/arpt" ]; then
+arpt=$(shuf -i 10000-65535 -n 1)
+echo "$arpt" > "$HOME/agsbx/arpt"
+elif [ -n "$arpt" ]; then
+echo "$arpt" > "$HOME/agsbx/arpt"
+fi
+arpt=$(cat "$HOME/agsbx/arpt")
+echo "Any-Reality端口：$arpt"
+cat >> "$HOME/agsbx/sb.json" <<EOF
+        {
+            "type":"anytls",
+            "tag":"anyreality-sb",
+            "listen":"::",
+            "listen_port":${arpt},
+            "users":[
+                {
+                  "password":"${uuid}"
+                }
+            ],
+            "padding_scheme":[],
+            "tls": {
+            "enabled": true,
+            "server_name": "${reym}",
+             "reality": {
+              "enabled": true,
+              "handshake": {
+              "server": "${reym}",
+              "server_port": 443
+             },
+             "private_key": "$private_key_s",
+             "short_id": ["$short_id_s"]
+            }
+          }
+        },
+EOF
+fi
 }
 
 xrsbso(){
@@ -498,7 +554,7 @@ nohup "$HOME/agsbx/sing-box" run -c "$HOME/agsbx/sb.json" >/dev/null 2>&1 &
 fi
 }
 ins(){
-if [ -z "$anpt" ]; then
+if [ -z "$anpt" ] && [ -z "$arpt" ]; then
 installxray
 xrsbso
 outcfg
@@ -516,7 +572,7 @@ outcfg
 xrsbout
 fi
 }
-argosbxstatus(){
+sbxstatus(){
 echo "=========当前内核运行状态========="
 procs=$(find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null)
 if echo "$procs" | grep -Eq 'agsbx/s' || pgrep -f 'agsbx/s' >/dev/null 2>&1; then
@@ -563,7 +619,7 @@ if echo "$v4" | grep -q '^104.28'; then
 w4="【WARP】"
 fi
 echo
-argosbxstatus
+sbxstatus
 echo
 echo "=========当前服务器本地IP情况========="
 echo "本地IPV4地址：$vps_ipv4 $w4"
@@ -618,7 +674,7 @@ short_id_s=$(cat "$HOME/agsbx/sbk/short_id" 2>/dev/null)
 sskey=$(cat "$HOME/agsbx/sskey" 2>/dev/null)
 fi
 if grep xhttp-reality "$HOME/agsbx/xr.json" >/dev/null 2>&1; then
-echo "💣【 Vless-xhttp-reality-enc 】支持ENC加密，节点信息如下："
+echo "【 Vless-xhttp-reality-enc 】支持ENC加密，节点信息如下："
 xhpt=$(cat "$HOME/agsbx/xhpt")
 vl_xh_link="vless://$uuid@$server_ip:$xhpt?encryption=$enkey&flow=xtls-rprx-vision&security=reality&sni=$reym&fp=chrome&pbk=$public_key_x&sid=$short_id_x&type=xhttp&path=$uuid-xh&mode=auto#${sxname}vl-xhttp-reality-$hostname"
 echo "$vl_xh_link" >> "$HOME/agsbx/jh.txt"
@@ -626,7 +682,7 @@ echo "$vl_xh_link"
 echo
 fi
 if grep reality-vision "$HOME/agsbx/xr.json" >/dev/null 2>&1; then
-echo "💣【 Vless-tcp-reality-vision 】节点信息如下："
+echo "【 Vless-tcp-reality-vision 】节点信息如下："
 vlpt=$(cat "$HOME/agsbx/vlpt")
 vl_link="vless://$uuid@$server_ip:$vlpt?encryption=none&flow=xtls-rprx-vision&security=reality&sni=$reym&fp=chrome&pbk=$public_key_x&sid=$short_id_x&type=tcp&headerType=none#${sxname}vl-reality-vision-$hostname"
 echo "$vl_link" >> "$HOME/agsbx/jh.txt"
@@ -634,15 +690,23 @@ echo "$vl_link"
 echo
 fi
 if grep anytls-sb "$HOME/agsbx/sb.json" >/dev/null 2>&1; then
-echo "💣【 AnyTLS 】节点信息如下："
+echo "【 AnyTLS 】节点信息如下："
 anpt=$(cat "$HOME/agsbx/anpt")
 an_link="anytls://$uuid@$server_ip:$anpt?insecure=1&allowInsecure=1#${sxname}anytls-$hostname"
 echo "$an_link" >> "$HOME/agsbx/jh.txt"
 echo "$an_link"
 echo
 fi
+if grep anyreality-sb "$HOME/agsbx/sb.json" >/dev/null 2>&1; then
+echo "【 Any-Reality 】节点信息如下："
+arpt=$(cat "$HOME/agsbx/arpt")
+ar_link="anytls://$uuid@$server_ip:$arpt?security=reality&sni=$reym&fp=chrome&pbk=$public_key_s&sid=$short_id_s&type=tcp&headerType=none#${sxname}any-reality-$hostname"
+echo "$ar_link" >> "$HOME/agsbx/jh.txt"
+echo "$ar_link"
+echo
+fi
 if grep hy2-sb "$HOME/agsbx/sb.json" >/dev/null 2>&1; then
-echo "💣【 Hysteria2 】节点信息如下："
+echo "【 Hysteria2 】节点信息如下："
 hypt=$(cat "$HOME/agsbx/hypt")
 hy2_link="hysteria2://$uuid@$server_ip:$hypt?security=tls&alpn=h3&insecure=1&sni=www.bing.com#${sxname}hy2-$hostname"
 echo "$hy2_link" >> "$HOME/agsbx/jh.txt"
@@ -650,7 +714,7 @@ echo "$hy2_link"
 echo
 fi
 if grep socks5-xr "$HOME/agsbx/xr.json" >/dev/null 2>&1 || grep socks5-sb "$HOME/agsbx/sb.json" >/dev/null 2>&1; then
-echo "💣【 Socks5 】客户端信息如下："
+echo "【 Socks5 】客户端信息如下："
 sopt=$(cat "$HOME/agsbx/sopt")
 echo "请配合其他应用内置代理使用，勿做节点直接使用"
 echo "客户端地址：$server_ip"
@@ -691,7 +755,7 @@ echo
 else
 echo "SBX脚本已安装"
 echo
-argosbxstatus
+sbxstatus
 echo
 echo "相关快捷方式如下："
 showmode

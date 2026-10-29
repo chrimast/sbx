@@ -36,10 +36,10 @@ sbx res     # 重启
 ## 保留协议
 
 - Xray：Vless-tcp-reality-vision、Vless-xhttp-reality-enc、Vless-xhttp-tls-UDP、Vless-xhttp-tls-TCP/UDP
-- Sing-box：AnyTLS
+- Sing-box：AnyTLS、Any-reality
 - 自动（已选 Xray 则用 Xray，否则 Sing-box）：Hysteria2、Socks5
 
-已去掉 Vless-ws-enc、Vless-xhttp-enc、Vmess-ws、Tuic、Naiveproxy、Any-reality、Shadowsocks-2022、订阅链接设置、Argo 隧道、套 WARP-IP 出站。
+已去掉 Vless-ws-enc、Vless-xhttp-enc、Vmess-ws、Tuic、Naiveproxy、Shadowsocks-2022、订阅链接设置、Argo 隧道、套 WARP-IP 出站。
 
 ## 外部 / 上游文件（非 sh）
 
