@@ -1,7 +1,7 @@
 #!/bin/bash
 export LANG=en_US.UTF-8
 mkdir -p "$HOME/agsbx"
-url='https://raw.githubusercontent.com/chrimast/sbx/main/argosbx.sh'
+url='https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh'
 case "${*##* }" in list|del|upx|ups|res) ;; *)
 cmd=""
 for v in uuid vlpt hypt xhpt anpt sopt xupt xcpt reym cdnym name oap; do
@@ -39,10 +39,10 @@ export ippz=${ippz:-''}
 export name=${name:-''}
 export oap=${oap:-''}
 v46url="https://icanhazip.com"
-agsbxurl="https://raw.githubusercontent.com/chrimast/sbx/main/argosbx.sh"
+agsbxurl="https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh"
 showmode(){
 [ -s "$HOME/agsbx/sh.txt" ] && echo "上次输入的完整脚本：$(cat "$HOME/agsbx/sh.txt")"
-echo "主脚本：bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/argosbx.sh) 或 bash <(wget -qO- https://raw.githubusercontent.com/chrimast/sbx/main/argosbx.sh)"
+echo "主脚本：bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh) 或 bash <(wget -qO- https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)"
 echo "显示节点信息命令：agsbx list 【或者】 主脚本 list"
 echo "重置变量组命令：自定义各种协议变量组 agsbx rep 【或者】 自定义各种协议变量组 主脚本 rep"
 echo "更新脚本命令：原已安装的自定义各种协议变量组 主脚本 rep"
