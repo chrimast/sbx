@@ -39,17 +39,17 @@ export ippz=${ippz:-''}
 export name=${name:-''}
 export oap=${oap:-''}
 v46url="https://icanhazip.com"
-agsbxurl="https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh"
+sbxurl="https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh"
 showmode(){
 [ -s "$HOME/agsbx/sh.txt" ] && echo "上次输入的完整脚本：$(cat "$HOME/agsbx/sh.txt")"
 echo "主脚本：bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh) 或 bash <(wget -qO- https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)"
-echo "显示节点信息命令：agsbx list 【或者】 主脚本 list"
-echo "重置变量组命令：自定义各种协议变量组 agsbx rep 【或者】 自定义各种协议变量组 主脚本 rep"
+echo "显示节点信息命令：sbx list 【或者】 主脚本 list"
+echo "重置变量组命令：自定义各种协议变量组 sbx rep 【或者】 自定义各种协议变量组 主脚本 rep"
 echo "更新脚本命令：原已安装的自定义各种协议变量组 主脚本 rep"
-echo "更新Xray或Singbox内核命令：agsbx upx或ups 【或者】 主脚本 upx或ups"
-echo "重启脚本命令：agsbx res 【或者】 主脚本 res"
-echo "卸载脚本命令：agsbx del 【或者】 主脚本 del"
-echo "双栈VPS显示IPv4/IPv6节点配置命令：ippz=4或6 agsbx list 【或者】 ippz=4或6 主脚本 list"
+echo "更新Xray或Singbox内核命令：sbx upx或ups 【或者】 主脚本 upx或ups"
+echo "重启脚本命令：sbx res 【或者】 主脚本 res"
+echo "卸载脚本命令：sbx del 【或者】 主脚本 del"
+echo "双栈VPS显示IPv4/IPv6节点配置命令：ippz=4或6 sbx list 【或者】 ippz=4或6 主脚本 list"
 echo "---------------------------------------------------------"
 echo
 }
@@ -744,12 +744,13 @@ echo
 if find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' || pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1 ; then
 [ -f ~/.bashrc ] || touch ~/.bashrc
 sed -i '/agsbx/d' ~/.bashrc
-SCRIPT_PATH="$HOME/bin/agsbx"
+SCRIPT_PATH="$HOME/bin/sbx"
 mkdir -p "$HOME/bin"
-(command -v curl >/dev/null 2>&1 && curl -sL "$agsbxurl" -o "$SCRIPT_PATH") || (command -v wget >/dev/null 2>&1 && wget -qO "$SCRIPT_PATH" "$agsbxurl")
+rm -f "$HOME/bin/agsbx"
+(command -v curl >/dev/null 2>&1 && curl -sL "$sbxurl" -o "$SCRIPT_PATH") || (command -v wget >/dev/null 2>&1 && wget -qO "$SCRIPT_PATH" "$sbxurl")
 chmod +x "$SCRIPT_PATH"
 if ! pidof systemd >/dev/null 2>&1 && ! command -v rc-service >/dev/null 2>&1; then
-echo "if ! find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' && ! pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then echo '检测到系统可能中断过，或者变量格式错误？建议在SSH对话框输入 reboot 重启下服务器。现在自动执行脚本的节点恢复操作，请稍等……'; sleep 6; export alns=\"${alns}\" cfip=\"${cfip}\" hyjpt=\"${hyjpt}\" cdnym=\"${cdnym}\" name=\"${name}\" ippz=\"${ippz}\" uuid=\"${uuid}\" $xhp=\"${port_xh}\" $xup=\"${port_xu}\" $sop=\"${port_so}\" $anp=\"${port_an}\" $vlp=\"${port_vl_re}\" $hyp=\"${port_hy2}\" $xcp=\"${port_xc}\" reym=\"${ym_vl_re}\"; bashbash "$HOME/bin/agsbx"; fi" >> ~/.bashrc
+echo "if ! find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' && ! pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then echo '检测到系统可能中断过，或者变量格式错误？建议在SSH对话框输入 reboot 重启下服务器。现在自动执行脚本的节点恢复操作，请稍等……'; sleep 6; export alns=\"${alns}\" cfip=\"${cfip}\" hyjpt=\"${hyjpt}\" cdnym=\"${cdnym}\" name=\"${name}\" ippz=\"${ippz}\" uuid=\"${uuid}\" $xhp=\"${port_xh}\" $xup=\"${port_xu}\" $sop=\"${port_so}\" $anp=\"${port_an}\" $vlp=\"${port_vl_re}\" $hyp=\"${port_hy2}\" $xcp=\"${port_xc}\" reym=\"${ym_vl_re}\"; bash "$HOME/bin/sbx"; fi" >> ~/.bashrc
 fi
 sed -i '/export PATH="\$HOME\/bin:\$PATH"/d' ~/.bashrc
 echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.bashrc"
@@ -1487,7 +1488,7 @@ echo
 echo "---------------------------------------------------------"
 echo "聚合节点信息，请进入 $HOME/agsbx/jhsub.txt 文件目录查看或者运行 cat $HOME/agsbx/jhsub.txt 查看"
 echo "========================================================="
-echo "相关快捷方式如下：(首次安装成功后需重连SSH，agsbx快捷方式才可生效；如未生效，请使用主脚本)"
+echo "相关快捷方式如下：(首次安装成功后需重连SSH，sbx快捷方式才可生效；如未生效，请使用主脚本)"
 showmode
 }
 cleandel(){
@@ -1503,7 +1504,7 @@ sed -i '/agsbx\/cloudflared/d' /tmp/crontab.tmp
 sed -i '/websbx/d' /tmp/crontab.tmp
 crontab /tmp/crontab.tmp >/dev/null 2>&1
 rm /tmp/crontab.tmp
-rm -rf  "$HOME/bin/agsbx"
+rm -rf "$HOME/bin/sbx" "$HOME/bin/agsbx"
 if pidof systemd >/dev/null 2>&1; then
 for svc in xr sb argo; do
 systemctl stop "$svc" >/dev/null 2>&1

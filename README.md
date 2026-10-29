@@ -22,7 +22,16 @@
 bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)
 ```
 
-常用：`list` 显示节点，`del` 卸载，`rep` 按新变量重置，`upx`/`ups` 升级内核，`res` 重启。
+安装后可用快捷命令（需重连 SSH 或 `export PATH="$HOME/bin:$PATH"`）：
+
+```bash
+sbx list    # 显示节点
+sbx del     # 卸载
+sbx rep     # 按当前环境变量重置
+sbx upx     # 升级 Xray
+sbx ups     # 升级 Sing-box
+sbx res     # 重启
+```
 
 ## 保留协议
 
@@ -34,10 +43,12 @@ bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)
 
 ## 外部 / 上游文件（非 sh）
 
-安装时按 CPU（`amd64` / `arm64`）从上游 Release 下载内核二进制，**不进本仓库**：
+安装时按 CPU（`amd64` / `arm64`）从 `yonggekkk/argosbx` 的 Release 下载内核二进制，**不进本仓库**。已对照官方包校验 SHA-256，与官方文件一致，不是魔改内核：
 
-- Xray：`https://github.com/yonggekkk/argosbx/releases/download/argosbx/xray-$cpu`
-- Sing-box：`https://github.com/yonggekkk/argosbx/releases/download/argosbx/sing-box-$cpu`
+- Xray = [XTLS/Xray-core v26.3.27](https://github.com/XTLS/Xray-core/releases/tag/v26.3.27) 的 `Xray-linux-64` 解压出的 `xray`
+  镜像：`https://github.com/yonggekkk/argosbx/releases/download/argosbx/xray-$cpu`
+- Sing-box = [SagerNet/sing-box v1.14.4](https://github.com/SagerNet/sing-box/releases/tag/v1.14.4) 的官方 linux 包里的 `sing-box`
+  镜像：`https://github.com/yonggekkk/argosbx/releases/download/argosbx/sing-box-$cpu`
 
 Clash 规则集（仅导出配置引用，运行时由客户端拉取）：
 

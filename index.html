@@ -448,12 +448,12 @@
       <section class="card shortcut-commands-card">
         <h2>如已安装脚本，可用以下快捷方式：</h2>
         <div class="shortcut-commands-content">
-          <button class="command-button" data-command="list">节点显示命令：list</button>
-          <button class="command-button" data-command="del">卸载脚本命令：del</button>
-          <button class="command-button" data-command="upx">升级Xray内核：upx</button>
-          <button class="command-button" data-command="ups">升级Singbox内核：ups</button>
-          <button class="command-button" data-command="res">重启脚本命令：res</button>
-          <button class="command-button" data-command="rep">调整并更新脚本（注:所有变量设置完成后再点击）：rep</button>
+          <button class="command-button" data-command="list">节点显示命令：sbx list</button>
+          <button class="command-button" data-command="del">卸载脚本命令：sbx del</button>
+          <button class="command-button" data-command="upx">升级Xray内核：sbx upx</button>
+          <button class="command-button" data-command="ups">升级Singbox内核：sbx ups</button>
+          <button class="command-button" data-command="res">重启脚本命令：sbx res</button>
+          <button class="command-button" data-command="rep">调整并更新脚本（注:所有变量设置完成后再点击）：sbx rep</button>
         </div>
       </section>
 
@@ -739,17 +739,14 @@
       if (command === 'rep') {
         const m = collectVars();
         const vars = toBashVars(m);
-        output.value = (vars ? vars + ' ' : '') + selectedCommand + ' rep';
+        output.value = (vars ? vars + ' ' : '') + 'sbx rep';
       } else {
         resetForm(shouldPreserveIppz);
         if (shouldPreserveIppz) {
           ippzSelect.value = ippzValue;
-          const m = collectVars();
-          m['ippz'] = ippzValue;
-          const vars = toBashVars(m);
-          output.value = `${vars} ${selectedCommand} ${command}`;
+          output.value = `ippz="${ippzValue}" sbx ${command}`;
         } else {
-          output.value = `${selectedCommand} ${command}`;
+          output.value = `sbx ${command}`;
         }
       }
     });
