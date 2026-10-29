@@ -173,7 +173,7 @@ EOF
 insuuid
 if [ -n "$xhpt" ] || [ -n "$vlpt" ]; then
 if [ -z "$reym" ]; then
-reym=apple.com
+reym=bing.com
 fi
 echo "$reym" > "$HOME/agsbx/reym"
 echo "Reality域名：$reym"
@@ -381,7 +381,7 @@ EOF
 fi
 if [ -n "$arpt" ]; then
 if [ -z "$reym" ]; then
-reym=apple.com
+reym=bing.com
 fi
 echo "$reym" > "$HOME/agsbx/reym"
 echo "Reality域名：$reym"
