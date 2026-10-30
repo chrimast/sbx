@@ -33,14 +33,14 @@ class AlnsAutoCert(unittest.TestCase):
         self.assertIn("--standalone", issue)
         self.assertIn("--server letsencrypt", issue)
 
-    def test_alns_calls_issueca_and_does_not_fallback_on_failure(self):
+    def test_alns_calls_issueca_and_falls_back_to_self_signed(self):
         sh = (ROOT / "sbx.sh").read_text(encoding="utf-8")
         tail = sh[sh.find('echo "脚本未安装') :]
         self.assertIn("issueca", tail)
-        self.assertIn("证书申请失败", tail)
+        self.assertNotIn("已停止安装", tail)
         self.assertNotIn("请自行准备 /root/sbxca", sh)
-        self.assertIn('[ -n "$alns" ]', tail)
-        self.assertIn("exit 1", tail)
+        self.assertIn("将使用自签证书的TLS", tail)
+        self.assertNotIn("exit 1", tail.split("ins\n", 1)[0])
 
     def test_index_allows_domain_or_ip_cert(self):
         html = (ROOT / "index.html").read_text(encoding="utf-8")

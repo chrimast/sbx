@@ -1890,8 +1890,7 @@ echo "$SHA256" > "$HOME/agsbx/SHA256.txt"
 fi
 if [ -n "$alns" ]; then
 if ! issueca; then
-echo "证书申请失败，已停止安装（未回退到自签证书）"
-exit 1
+echo "证书申请失败，将改用自签证书继续安装"
 fi
 fi
 echo
