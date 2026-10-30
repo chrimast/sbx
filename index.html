@@ -432,9 +432,10 @@
         <div class="row"><label>启用域名IP证书TLS <span class="pill">alns</span></label>
           <select id="alns">
             <option value="">默认 关闭 (HY2/Anytls/Xhttp-tls为自签证书TLS)</option>
-            <option value="y">开启 (HY2/Anytls/Xhttp-tls为域名IP证书TLS)</option>
+            <option value="y">开启 (自动申请 Let's Encrypt，HY2/Anytls/Xhttp-tls用CA证书)</option>
           </select>
         </div>
+        <div class="row"><label>证书域名 <span class="pill">cadn</span></label><input id="cadn" type="text" placeholder="alns开启后填写；留空则申请本机IP证书" disabled/></div>
         <div class="row"><label>Hysteria2端口跳跃 <span class="pill">hyjpt</span></label><input id="hyjpt" type="text" placeholder="支持多个范围端口与单端口混用(空格间隔)，例：123:456 789" disabled/></div>
         <div class="row"><label>CF解析IP的域名<span class="pill">cdnym</span></label><input id="cdnym" type="text" placeholder="Vless相关协议启用80、回源CDN时可用" disabled/></div>
         <div class="row"><label>IPv4/IPv6 配置导出 <span class="pill">ippz</span></label>
@@ -489,7 +490,7 @@
   const CURL = 'bash <(curl -Ls https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)';
   const WGET = 'bash <(wget -qO- https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh)';
   const protoKeys = ['sopt','vlpt','xhpt','xupt','xcpt','hypt','anpt','arpt'];
-  const optIds = ['ippz','uuid','reym','cfip','alns','hyjpt','cdnym','name', 'oap'];
+  const optIds = ['ippz','uuid','reym','cfip','alns','cadn','hyjpt','cdnym','name', 'oap'];
 
   const cfip = document.getElementById('cfip');
   const vlessTcpRealityCheckbox = document.querySelector('[data-proto="vlpt"]');
@@ -500,6 +501,7 @@
 
   const reymInput = document.getElementById('reym');
   const alnsSelect = document.getElementById('alns');
+  const cadnInput = document.getElementById('cadn');
   const hyjptInput = document.getElementById('hyjpt');
   const cdnymInput = document.getElementById('cdnym');
   
@@ -547,6 +549,7 @@
     document.getElementById('reym').value = '';
     document.getElementById('cfip').value = '';
     document.getElementById('alns').value = '';
+    document.getElementById('cadn').value = '';
     document.getElementById('hyjpt').value = '';
     document.getElementById('name').value = '';
     updateDynamicInputs();
@@ -560,6 +563,12 @@
       const isRealityEnabled = (vlessTcpRealityCheckbox && vlessTcpRealityCheckbox.checked) || (vlessXhttpRealityCheckbox && vlessXhttpRealityCheckbox.checked) || (anyRealityCheckbox && anyRealityCheckbox.checked);
       reymInput.disabled = !isRealityEnabled;
       if (!isRealityEnabled) reymInput.value = '';
+
+      const isAlnsEnabled = alnsSelect && alnsSelect.value === 'y';
+      if (cadnInput) {
+        cadnInput.disabled = !isAlnsEnabled;
+        if (!isAlnsEnabled) cadnInput.value = '';
+      }
 
       const isHy2Enabled = hy2Checkbox && hy2Checkbox.checked;
       hyjptInput.disabled = !isHy2Enabled;
@@ -643,7 +652,7 @@
     const keys = Object.keys(m);
     const ordered = [];
     protoKeys.forEach(k => { if (keys.includes(k)) ordered.push(k); });
-    ['uuid', 'reym', 'cfip', 'alns', 'hyjpt', 'cdnym', 'name', 'ippz'].forEach(k => { if (keys.includes(k)) ordered.push(k); });
+    ['uuid', 'reym', 'cfip', 'alns', 'cadn', 'hyjpt', 'cdnym', 'name', 'ippz'].forEach(k => { if (keys.includes(k)) ordered.push(k); });
     if (keys.includes('oap')) ordered.push('oap');
     keys.forEach(k => { if (!ordered.includes(k)) ordered.push(k); });
 
@@ -703,6 +712,7 @@
     } else {
       alnsSelect.value = '';
     }
+    if (cadnInput) cadnInput.disabled = (params['alns'] !== 'y');
 
     const isCdnEnabled = params['xcpt'] !== undefined;
     cdnymInput.disabled = !isCdnEnabled;

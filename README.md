@@ -12,7 +12,7 @@
 - `container/nodejs/index.js`、`container/nodejs/package.json`：容器探测页
 - `LICENSE`：GPLv3
 
-仓库里没有其它 `.sh`。运行时也不会再下载任何外部 shell 脚本。
+仓库里没有其它 `.sh`。运行时不会再下载第三方安装脚本。开启 `alns=y` 时会安装官方 [acme.sh](https://get.acme.sh) 申请 Let's Encrypt 证书，写入 `/root/sbxca`。
 
 ## 使用
 
@@ -54,6 +54,12 @@ Clash 规则集（仅导出配置引用，运行时由客户端拉取）：
 
 - `https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/cn.srs`
 - `https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geoip/cn.srs`
+
+证书（仅 `alns=y`）：
+
+- 官方 acme.sh：`https://get.acme.sh`
+- 证书目录：`/root/sbxca/cert.crt`、`/root/sbxca/private.key`、`/root/sbxca/ca.log`
+- 留空 `cadn` 申请本机 IP 证书；填写 `cadn=域名` 申请域名证书（需解析到本机、关闭 CDN、80 端口空闲）
 
 探测与 DNS（不是脚本、不是内核）：
 

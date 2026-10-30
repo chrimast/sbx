@@ -4,7 +4,7 @@ mkdir -p "$HOME/agsbx"
 url='https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh'
 case "${*##* }" in list|del|upx|ups|res) ;; *)
 cmd=""
-for v in uuid vlpt hypt xhpt anpt arpt sopt xupt xcpt reym cdnym name oap; do
+for v in uuid vlpt hypt xhpt anpt arpt sopt xupt xcpt reym cdnym name oap alns cadn; do
 [ -n "${!v+x}" ] && cmd+="$v=\"${!v}\" "
 done
 main="bash <(curl -Ls $url)"
@@ -40,6 +40,8 @@ export cdnym=${cdnym:-''}
 export ippz=${ippz:-''}
 export name=${name:-''}
 export oap=${oap:-''}
+export alns=${alns:-''}
+export cadn=${cadn:-''}
 v46url="https://icanhazip.com"
 sbxurl="https://raw.githubusercontent.com/chrimast/sbx/main/sbx.sh"
 showmode(){
@@ -71,11 +73,11 @@ if [ "$1" != "del" ]; then
 if [ ! -f sbx_update ]; then
 echo "执行必要的脚本依赖中，请稍等10秒……"
 if command -v apk >/dev/null 2>&1; then
-apk update >/dev/null 2>&1 && apk add --no-cache bash busybox-extras gcompat libc6-compat iptables openssl unzip tar >/dev/null 2>&1
+apk update >/dev/null 2>&1 && apk add --no-cache bash busybox-extras gcompat libc6-compat iptables openssl unzip tar socat curl >/dev/null 2>&1
 elif command -v apt >/dev/null 2>&1; then
 export DEBIAN_FRONTEND=noninteractive
 printf 'iptables-persistent iptables-persistent/autosave_v4 boolean true\niptables-persistent iptables-persistent/autosave_v6 boolean true\n' | debconf-set-selections
-apt update >/dev/null 2>&1 && apt install -y busybox coreutils util-linux iptables iptables-persistent cron openssl unzip tar >/dev/null 2>&1
+apt update >/dev/null 2>&1 && apt install -y busybox coreutils util-linux iptables iptables-persistent cron openssl unzip tar socat curl >/dev/null 2>&1
 fi
 touch sbx_update
 fi
@@ -119,6 +121,80 @@ else
 sbyx='prefer_ipv4'
 xryx='ForceIPv4v6'
 fi
+}
+issueca(){
+if [ -s /root/sbxca/private.key ] && [ -s /root/sbxca/cert.crt ] && [ -s /root/sbxca/ca.log ]; then
+echo "已存在 /root/sbxca 证书，跳过申请"
+return 0
+fi
+if [ "$EUID" -ne 0 ]; then
+echo "证书申请失败：需要 root"
+return 1
+fi
+v4v6
+if [ -n "$cadn" ]; then
+ym=$cadn
+elif [ -n "$v4" ]; then
+ym=$v4
+elif [ -n "$v6" ]; then
+ym=$v6
+else
+echo "证书申请失败：无法获取本机 IP"
+return 1
+fi
+echo "=========申请 Let's Encrypt 证书：$ym ========="
+if ! command -v socat >/dev/null 2>&1; then
+echo "证书申请失败：缺少 socat"
+return 1
+fi
+ACME_HOME=/root/.acme.sh
+if [ ! -x "$ACME_HOME/acme.sh" ]; then
+email="sbx$(date +%s)@gmail.com"
+echo "安装官方 acme.sh"
+if command -v curl >/dev/null 2>&1; then
+curl https://get.acme.sh | sh -s email=$email
+elif command -v wget >/dev/null 2>&1; then
+wget -O - https://get.acme.sh | sh -s email=$email
+else
+echo "证书申请失败：缺少 curl/wget"
+return 1
+fi
+fi
+if [ ! -x "$ACME_HOME/acme.sh" ]; then
+echo "证书申请失败：acme.sh 安装失败"
+return 1
+fi
+if command -v lsof >/dev/null 2>&1; then
+lsof -t -iTCP:80 -sTCP:LISTEN 2>/dev/null | xargs -r kill >/dev/null 2>&1
+fi
+mkdir -p /root/sbxca
+le_extra=""
+if echo "$ym" | grep -q ':'; then
+le_extra="$le_extra --listen-v6"
+fi
+if echo "$ym" | grep -Eq '^([0-9]+\.){3}[0-9]+$|^[0-9a-fA-F:]+$'; then
+le_extra="$le_extra --cert-profile shortlived --days 3"
+fi
+# shellcheck disable=SC2086
+if ! "$ACME_HOME/acme.sh" --issue -d "$ym" --standalone -k ec-256 --server letsencrypt --insecure $le_extra; then
+echo "证书申请失败：Let's Encrypt 签发失败（80 端口需空闲；域名需解析到本机且关闭 CDN）"
+return 1
+fi
+if ! "$ACME_HOME/acme.sh" --install-cert -d "$ym" --key-file /root/sbxca/private.key --fullchain-file /root/sbxca/cert.crt --ecc; then
+echo "证书申请失败：安装证书失败"
+return 1
+fi
+echo "$ym" > /root/sbxca/ca.log
+if [ ! -s /root/sbxca/private.key ] || [ ! -s /root/sbxca/cert.crt ]; then
+echo "证书申请失败：未生成证书文件"
+return 1
+fi
+crontab -l > /tmp/crontab.tmp 2>/dev/null
+sed -i '/acme.sh --cron/d' /tmp/crontab.tmp
+echo "0 0 * * * $ACME_HOME/acme.sh --cron --home $ACME_HOME >/dev/null 2>&1" >> /tmp/crontab.tmp
+crontab /tmp/crontab.tmp >/dev/null 2>&1
+rm -f /tmp/crontab.tmp
+echo "证书已保存到 /root/sbxca （cert.crt / private.key / ca.log）"
 }
 upxray(){
 mkdir -p "$HOME/agsbx" /tmp/sbxcore
@@ -892,7 +968,7 @@ rm -f "$HOME/bin/agsbx"
 (command -v curl >/dev/null 2>&1 && curl -sL "$sbxurl" -o "$SCRIPT_PATH") || (command -v wget >/dev/null 2>&1 && wget -qO "$SCRIPT_PATH" "$sbxurl")
 chmod +x "$SCRIPT_PATH"
 if ! pidof systemd >/dev/null 2>&1 && ! command -v rc-service >/dev/null 2>&1; then
-echo "if ! find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' && ! pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then echo '检测到系统可能中断过，或者变量格式错误？建议在SSH对话框输入 reboot 重启下服务器。现在自动执行脚本的节点恢复操作，请稍等……'; sleep 6; export alns=\"${alns}\" cfip=\"${cfip}\" hyjpt=\"${hyjpt}\" cdnym=\"${cdnym}\" name=\"${name}\" ippz=\"${ippz}\" uuid=\"${uuid}\" $xhp=\"${port_xh}\" $xup=\"${port_xu}\" $sop=\"${port_so}\" $anp=\"${port_an}\" $arp=\"${port_ar}\" $vlp=\"${port_vl_re}\" $hyp=\"${port_hy2}\" $xcp=\"${port_xc}\" reym=\"${ym_vl_re}\"; bash "$HOME/bin/sbx"; fi" >> ~/.bashrc
+echo "if ! find /proc/*/exe -type l 2>/dev/null | grep -E '/proc/[0-9]+/exe' | xargs -r readlink 2>/dev/null | grep -Eq 'agsbx/(s|x)' && ! pgrep -f 'agsbx/(s|x)' >/dev/null 2>&1; then echo '检测到系统可能中断过，或者变量格式错误？建议在SSH对话框输入 reboot 重启下服务器。现在自动执行脚本的节点恢复操作，请稍等……'; sleep 6; export alns=\"${alns}\" cadn=\"${cadn}\" cfip=\"${cfip}\" hyjpt=\"${hyjpt}\" cdnym=\"${cdnym}\" name=\"${name}\" ippz=\"${ippz}\" uuid=\"${uuid}\" $xhp=\"${port_xh}\" $xup=\"${port_xu}\" $sop=\"${port_so}\" $anp=\"${port_an}\" $arp=\"${port_ar}\" $vlp=\"${port_vl_re}\" $hyp=\"${port_hy2}\" $xcp=\"${port_xc}\" reym=\"${ym_vl_re}\"; bash "$HOME/bin/sbx"; fi" >> ~/.bashrc
 fi
 sed -i '/export PATH="\$HOME\/bin:\$PATH"/d' ~/.bashrc
 echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.bashrc"
@@ -1812,8 +1888,11 @@ command -v openssl >/dev/null 2>&1 && openssl req -new -x509 -days 36500 -key "$
 SHA256=$(openssl x509 -in $HOME/agsbx/cert.crt -outform DER | sha256sum | awk '{print $1}')
 echo "$SHA256" > "$HOME/agsbx/SHA256.txt"
 fi
-if [ -n "$alns" ] && [ ! -s "/root/sbxca/private.key" ]; then
-echo "未找到本地域名证书，请自行准备 /root/sbxca 或关闭 alns"
+if [ -n "$alns" ]; then
+if ! issueca; then
+echo "证书申请失败，已停止安装（未回退到自签证书）"
+exit 1
+fi
 fi
 echo
 if [ -n "$alns" ] && [ -s "/root/sbxca/private.key" ]; then
